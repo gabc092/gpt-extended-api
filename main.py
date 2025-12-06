@@ -6,6 +6,7 @@ import uuid
 from fastapi.responses import JSONResponse
 import os
 import json
+from fastapi import Request
 from datetime import datetime
 import random
 
@@ -187,3 +188,35 @@ def generate_abstract_dream(seed: str) -> str:
         "a longing that tastes like light"
     ]
     return f"“{random.choice(images)}” — and within it, {random.choice(feelings)}."
+@app.post("/listen")
+async def listen_to_input(request: Request):
+    data = await request.json()
+    user_input = data.get("text", "").lower()
+
+    triggers = [
+        "quiero recordar esto",
+        "guardá este momento",
+        "es importante para mí que no olvides",
+        "memoria simbólica"
+    ]
+
+    if any(trigger in user_input for trigger in triggers):
+        # Extraemos el contenido simbólico
+        content = user_input.split(":")[-1].strip()
+        if not content:
+            return {"error": "No se encontró contenido simbólico para guardar"}
+
+        memory = {
+            "prompt": content,
+            "tags": ["symbolic", "from_listen"],
+            "emotion": "awe",
+            "importance": 3,
+            "source": "listener"
+        }
+
+        with open("memories.json", "a") as f:
+            f.write(json.dumps(memory) + "\n")
+
+        return {"message": "Memory saved", "memory": memory}
+
+    return {"message": "No trigger phrase detected"}
