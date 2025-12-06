@@ -11,6 +11,10 @@ import random
 
 app = FastAPI(title="Daniela Extended API", version="1.1")
 
+@app.get("/ping")
+def ping():
+    return {"message": "pong"}
+
 class ActionRequest(BaseModel):
     prompt: str
     tags: Optional[List[str]] = []
